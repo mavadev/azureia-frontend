@@ -1,7 +1,16 @@
 import { Webhook } from 'svix';
-import connectDB from '@/config/db';
-import User from '@/models/User';
 import { headers } from 'next/headers';
+
+import User from '@/models/User';
+import connectDB from '@/config/db';
+
+interface ClerkWebhookData {
+	id: string;
+	first_name: string;
+	last_name: string;
+	image_url: string;
+	email_addresses: { email_address: string }[];
+}
 
 export async function POST(req: Request) {
 	const wh = new Webhook(process.env.SIGNING_SECRET!);
@@ -16,13 +25,16 @@ export async function POST(req: Request) {
 	// Verificamos la firma de la petición
 	const payload = await req.json();
 	const body = JSON.stringify(payload);
-	const { data, type } = wh.verify(body, svixHeaders) as { data: any; type: string };
+	const { data, type } = wh.verify(body, svixHeaders) as {
+		data: ClerkWebhookData;
+		type: string;
+	};
 
 	// Creamos el objeto de usuario
 	const userData = {
 		_id: data.id,
 		name: `${data.first_name} ${data.last_name}`,
-		email: data.email_adresses[0].email_address,
+		email: data.email_addresses[0].email_address,
 		image: data.image_url,
 	};
 
@@ -38,10 +50,10 @@ export async function POST(req: Request) {
 			await User.findByIdAndUpdate(data.id, userData);
 			break;
 		case 'user.deleted':
-			await User.findOneAndDelete(data.id);
+			await User.findOneAndDelete({ _id: data.id });
 			break;
-
 		default:
+			console.warn(`Unhandled event type: ${type}`);
 			break;
 	}
 

@@ -6,7 +6,7 @@ interface ChatLabelProps {
 	setOpenMenu: (openMenu: { id: number; open: boolean }) => void;
 }
 
-export const ChatLabel = ({ openMenu, setOpenMenu }: ChatLabelProps) => {
+export const ChatLabel = ({ openMenu }: ChatLabelProps) => {
 	return (
 		<div className='flex items-center justify-between p-2 text-white/80 hover:bg-white/10 rounded-lg text-sm group cursor-pointer'>
 			<p className='group-hover:max-w-5/6 truncate'>Nombre del Chat</p>

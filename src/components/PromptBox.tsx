@@ -7,7 +7,7 @@ interface PromptBoxProps {
 	setIsLoading: (isLoading: boolean) => void;
 }
 
-export const PromptBox = ({ isLoading, setIsLoading }: PromptBoxProps) => {
+export const PromptBox = ({}: PromptBoxProps) => {
 	const [prompt, setPrompt] = useState('');
 
 	return (

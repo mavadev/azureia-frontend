@@ -1,8 +1,9 @@
 'use client';
 import { useUser } from '@clerk/nextjs';
+import type { UserResource } from '@clerk/types';
 import { createContext, useContext, PropsWithChildren } from 'react';
 
-export const AppContext = createContext<{ user: any }>({ user: null });
+export const AppContext = createContext<{ user: UserResource | null | undefined }>({ user: undefined });
 
 export const useAppContext = () => {
 	return useContext(AppContext);
