@@ -21,11 +21,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<ClerkProvider>
-			<AppContextProvider>
-				<html lang='en'>
-					<body className={`${interFont.className} antialiased`}>{children}</body>
-				</html>
-			</AppContextProvider>
+			<html lang='en'>
+				<body className={`${interFont.className} antialiased`}>
+					<AppContextProvider>{children}</AppContextProvider>
+				</body>
+			</html>
 		</ClerkProvider>
 	);
 }
