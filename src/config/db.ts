@@ -7,26 +7,25 @@ interface MongooseCache {
 
 declare global {
 	interface GlobalThis {
-		mongoose?: MongooseCache;
+		mongooseCache?: MongooseCache;
 	}
 }
 
-const cached: MongooseCache = (globalThis as GlobalThis).mongoose ?? { conn: null, promise: null };
+const globalWithCache = globalThis as typeof globalThis & { mongooseCache?: MongooseCache };
+
+const cache: MongooseCache = globalWithCache.mongooseCache ?? { conn: null, promise: null };
+globalWithCache.mongooseCache = cache;
 
 export default async function connectDB(): Promise<Connection> {
-	if (cached.conn) return cached.conn;
+	if (cache.conn) return cache.conn;
 
-	if (!cached.promise) {
-		cached.promise = mongoose.connect(process.env.MONGODB_URI!).then(mongoose => mongoose.connection);
+	if (!cache.promise) {
+		if (!process.env.MONGODB_URI) {
+			throw new Error('MONGODB_URI no esta definido');
+		}
+		cache.promise = mongoose.connect(process.env.MONGODB_URI).then(m => m.connection);
 	}
 
-	try {
-		cached.conn = await cached.promise;
-		(globalThis as GlobalThis).mongoose = cached;
-	} catch (error) {
-		console.error('Error connecting to MongoDB:', error);
-		throw error;
-	}
-
-	return cached.conn;
+	cache.conn = await cache.promise;
+	return cache.conn;
 }

@@ -1,6 +1,8 @@
+import './prism.css';
+import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
+import { Toaster } from 'react-hot-toast';
 import { ClerkProvider } from '@clerk/nextjs';
 import { AppContextProvider } from '@/context/AppContext';
 
@@ -23,7 +25,15 @@ export default function RootLayout({
 		<ClerkProvider>
 			<html lang='en'>
 				<body className={`${interFont.className} antialiased`}>
-					<AppContextProvider>{children}</AppContextProvider>
+					<AppContextProvider>
+						<Toaster
+							toastOptions={{
+								success: { style: { background: 'black', color: 'white' } },
+								error: { style: { background: 'black', color: 'white' } },
+							}}
+						/>
+						{children}
+					</AppContextProvider>
 				</body>
 			</html>
 		</ClerkProvider>

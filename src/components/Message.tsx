@@ -1,18 +1,37 @@
-import { assets } from '@/assets/assets';
+import Prism from 'prismjs';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import Markdown from 'react-markdown';
+
+import { assets } from '@/assets/assets';
+import { Role } from '@/interfaces/Message';
 
 interface MessageProps {
-	role: string;
+	role: Role;
 	content: string;
 }
 
 export const Message = ({ role, content }: MessageProps) => {
+	useEffect(() => {
+		Prism.highlightAll();
+	}, [content]);
+
+	const copyMessage = async () => {
+		try {
+			await navigator.clipboard.writeText(content);
+			toast.success('Mensaje copiado al portapapeles');
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Error al copiar');
+		}
+	};
+
 	return (
 		<div className='flex flex-col items-center w-full max-w-3xl text-sm'>
-			<div className={`flex flex-col w-full mb-8 ${role === 'user' && 'items-end'}`}>
+			<div className={`flex flex-col w-full mb-8 ${role === 'user' ? 'items-end' : ''}`}>
 				<div
 					className={`group relative flex max-w-2xl py-3 rounded-xl ${
-						role === 'user' ? 'bg-[#414158] px-5' : 'gap-3'
+						role === 'user' ? 'bg-[#414158] px-5' : 'gap-4'
 					}`}>
 					<div
 						className={`opacity-0 group-hover:opacity-100 absolute ${
@@ -24,6 +43,7 @@ export const Message = ({ role, content }: MessageProps) => {
 									<Image
 										alt=''
 										className='w-4 cursor-pointer'
+										onClick={copyMessage}
 										src={assets.copy_icon}
 									/>
 									<Image
@@ -37,6 +57,7 @@ export const Message = ({ role, content }: MessageProps) => {
 									<Image
 										alt=''
 										className='w-4.5 cursor-pointer'
+										onClick={copyMessage}
 										src={assets.copy_icon}
 									/>
 									<Image
@@ -58,6 +79,7 @@ export const Message = ({ role, content }: MessageProps) => {
 							)}
 						</div>
 					</div>
+
 					{role === 'user' ? (
 						<span className='text-white/90'>{content}</span>
 					) : (
@@ -65,9 +87,11 @@ export const Message = ({ role, content }: MessageProps) => {
 							<Image
 								alt=''
 								src={assets.logo_icon}
-								className='h-9 w-9 p-1 border border-white/15 rounded-full'
+								className='h-9 w-9 p-1 border border-white/15 rounded-full bg-red-100'
 							/>
-							<div className='space-y-4 w-full overflow-scroll'>{content}</div>
+							<div className='space-y-4 w-full overflow-auto leading-6'>
+								<Markdown>{content}</Markdown>
+							</div>
 						</>
 					)}
 				</div>

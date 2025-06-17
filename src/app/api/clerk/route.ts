@@ -11,9 +11,10 @@ interface ClerkWebhookData {
 	image_url: string;
 	email_addresses: { email_address: string }[];
 }
+type ClerkEventType = 'user.created' | 'user.updated' | 'user.deleted';
 
 export async function POST(req: Request) {
-	const wh = new Webhook(process.env.SIGNING_SECRET!);
+	const svix = new Webhook(process.env.SIGNING_SECRET!);
 
 	// Obtenemos los headers de la petición
 	const headerPayload = await headers();
@@ -26,9 +27,9 @@ export async function POST(req: Request) {
 	// Verificamos la firma de la petición
 	const payload = await req.json();
 	const body = JSON.stringify(payload);
-	const { data, type } = wh.verify(body, svixHeaders) as {
+	const { data, type } = svix.verify(body, svixHeaders) as {
 		data: ClerkWebhookData;
-		type: string;
+		type: ClerkEventType;
 	};
 
 	// Creamos el objeto de usuario
