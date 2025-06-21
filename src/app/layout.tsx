@@ -12,8 +12,14 @@ const interFont = Inter({
 });
 
 export const metadata: Metadata = {
-	title: 'Leo - Modelo Azure AI',
+	title: 'Compartamos Banco IA',
 	description: 'Full Stack Project with Next.js',
+	icons: {
+		icon: '/favicon.ico',
+		shortcut: '/favicon-96x96.png',
+		apple: '/apple-touch-icon.png',
+	},
+	manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({

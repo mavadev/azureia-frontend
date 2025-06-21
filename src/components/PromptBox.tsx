@@ -16,7 +16,7 @@ interface PromptBoxProps {
 export const PromptBox = ({ isLoading, setIsLoading }: PromptBoxProps) => {
 	const { user } = useUser();
 	const [prompt, setPrompt] = useState<string>('');
-	const { selectedChat, setSelectedChat, sendPromptToAI, type, setType } = useAppContext();
+	const { selectedChat, setSelectedChat, setChats, sendPromptToAI, type, setType } = useAppContext();
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
@@ -46,18 +46,24 @@ export const PromptBox = ({ isLoading, setIsLoading }: PromptBoxProps) => {
 			setSelectedChat((prev: ChatItem | null) => (prev ? { ...prev, messages: [...prev.messages, userPrompt] } : null));
 
 			// Respuesta de la IA
-			const { message, title } = await sendPromptToAI(selectedChat._id, promptCopy, type);
-			setSelectedChat((prev: ChatItem | null) => (prev ? { ...prev, messages: [...prev.messages, message] } : null));
+			const { message: messageIA, title: chatTitle } = await sendPromptToAI(selectedChat._id, promptCopy, type);
+			setSelectedChat((prev: ChatItem | null) => (prev ? { ...prev, messages: [...prev.messages, messageIA] } : null));
 
-			// Renombrar titulo del chat con conversación
-			setSelectedChat((prev: ChatItem | null) =>
-				prev
-					? {
-							...prev,
-							name: title,
-					  }
-					: null
-			);
+			// Renombrar titulo del chat en caso sea la primera respuesta
+			if (chatTitle) {
+				setChats((prev: ChatItem[]) => {
+					return prev.map(chat => {
+						if (chat._id === selectedChat._id) {
+							return {
+								...chat,
+								name: chatTitle,
+							};
+						}
+						return chat;
+					});
+				});
+				setSelectedChat((prev: ChatItem | null) => (prev ? { ...prev, name: chatTitle } : null));
+			}
 
 			// Mensaje de la IA
 			const assistantTimestamp = Date.now();
@@ -71,7 +77,7 @@ export const PromptBox = ({ isLoading, setIsLoading }: PromptBoxProps) => {
 			setIsLoading(false);
 
 			// Separar el mensaje en tokens
-			const messageTokens = message.content.split(' ');
+			const messageTokens = messageIA.content.split(' ');
 			messageTokens.forEach((_, i) => {
 				setTimeout(() => {
 					assistantMessage = {
@@ -144,7 +150,7 @@ export const PromptBox = ({ isLoading, setIsLoading }: PromptBoxProps) => {
 					/>
 					<button
 						type='submit'
-						className={`${prompt ? 'bg-primary' : 'bg-[#71717a]'} rounded-full p-2 cursor-pointer transition`}>
+						className={`${prompt ? 'bg-[#e02c77]' : 'bg-[#71717a]'} rounded-full p-2 cursor-pointer transition`}>
 						<Image
 							alt='Pin Icon'
 							className='w-3.5 aspect-square'

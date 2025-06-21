@@ -24,7 +24,7 @@ interface AppContextProps {
 		chatId: string,
 		prompt: string,
 		typePrompt: ChatType
-	) => Promise<{ message: Message; title: string }>;
+	) => Promise<{ message: Message; title?: string }>;
 }
 
 // Creamos el contexto
@@ -50,6 +50,7 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
 				await createNewChat();
 				return fetchChats();
 			}
+
 			setSelectedChat(prev => prev || data[0] || null);
 		} catch (error) {
 			console.error('Error fetching chats:', error);
@@ -97,7 +98,7 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
 
 	// Enviar prompt a IA
 	const sendPromptToAI = useCallback(
-		async (chatId: string, prompt: string, typePrompt: ChatType): Promise<{ message: Message; title: string }> => {
+		async (chatId: string, prompt: string, typePrompt: ChatType): Promise<{ message: Message; title?: string }> => {
 			return await chatService.sendPrompt(chatId, prompt, typePrompt);
 		},
 		[]

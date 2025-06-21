@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
 
 		// Obtenemos el body
 		const { chatId, prompt, type }: ChatRequestBody = await req.json();
-		console.log({ type });
 
 		// Obtenemos el chat correspondiente al usuario
 		await connectDB();
@@ -43,6 +42,7 @@ export async function POST(req: NextRequest) {
 		const { data: dataResponse } = await axios.post<{ response: string }>(`${process.env.API_URL}/chat/${type}`!, {
 			user_message: prompt,
 		});
+
 		const assistantMessage: IMessage = {
 			role: 'assistant',
 			content: dataResponse.response,
@@ -50,12 +50,20 @@ export async function POST(req: NextRequest) {
 		};
 		chat.messages.push(assistantMessage);
 
-		// Llamamos a la IA para respuesta de titulo
+		// Enviamos solo el mensaje tenga un titulo establecido
+		if (chat.messages.length > 2) {
+			// Guardamos el chat
+			await chat.save();
+			return NextResponse.json({ message: assistantMessage }, { status: 200 });
+		}
+
+		// Llamamos a la IA para respuesta de titulo solo si es la primera respuesta de la IA para el chat
 		const { data: dataTitle } = await axios.post<{ response: string }>(`${process.env.API_URL}/chat/general`!, {
-			user_message: dataResponse.response + '. Dime en un titulo corto para esta conversación, solo el titulo',
+			user_message:
+				dataResponse.response + '. Dime en un titulo corto para esta conversación, solo el titulo sin comillas',
 		});
 
-		// Guardamos el chat
+		chat.name = dataTitle.response;
 		await chat.save();
 
 		return NextResponse.json({ message: assistantMessage, title: dataTitle.response }, { status: 200 });

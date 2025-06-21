@@ -23,7 +23,7 @@ export const sendPrompt = async (
 	chatId: string,
 	prompt: string,
 	type: ChatType
-): Promise<{ message: Message; title: string }> => {
+): Promise<{ message: Message; title?: string }> => {
 	const { data } = await axios.post('/api/chat/ai', { chatId, prompt, type });
 	return data;
 };
